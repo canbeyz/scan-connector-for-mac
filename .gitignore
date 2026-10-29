@@ -1,0 +1,17 @@
+.DS_Store
+/build/
+/dist/
+/.venv/
+__pycache__/
+*.pyc
+*.log
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.dmg
+*.zip
+*.p12
+*.mobileprovision
+.env
+Settings.json

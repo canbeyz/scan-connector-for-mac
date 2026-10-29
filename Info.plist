@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>Scan Connector for Mac</string>
+<key>CFBundleIdentifier</key><string>local.mac-native-scan.app</string>
+<key>CFBundleName</key><string>Scan Connector for Mac</string>
+<key>CFBundleDisplayName</key><string>Scan Connector for Mac</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>0.0.1</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleDevelopmentRegion</key><string>en</string>
+<key>CFBundleIconFile</key><string>AppIcon</string>
+<key>LSMinimumSystemVersion</key><string>13.0</string>
+<key>NSHighResolutionCapable</key><true/>
+<key>NSPrincipalClass</key><string>NSApplication</string>
+<key>NSHumanReadableCopyright</key><string>Copyright © 2026 Scan Connector contributors. MIT license. Independent community software.</string>
+<key>NSLocalNetworkUsageDescription</key><string>Discover and connect to a Brother printer on your local network, receive scans from its control panel, and save them to your selected folder.</string>
+<key>NSBonjourServices</key><array><string>_uscan._tcp</string><string>_uscans._tcp</string></array>
+<key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/><key>NSAllowsArbitraryLoads</key><true/></dict>
+</dict></plist>
