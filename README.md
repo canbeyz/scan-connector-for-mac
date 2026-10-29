@@ -1,6 +1,8 @@
 # Scan Connector for Mac
 
-**Initial public release: 0.0.1** · [Download for Apple silicon](https://github.com/canbeyz/scan-connector-for-mac/releases/latest)
+**Current release: 0.0.2** · [Download for Apple silicon](https://github.com/canbeyz/scan-connector-for-mac/releases/latest)
+
+Version 0.0.2 fixes a crash when reopening the settings window after closing it. Closing the window keeps the receiver running, and the same window can be opened again from the menu bar or Dock.
 
 **Independent community software for compatible network scanners.**
 
@@ -65,6 +67,7 @@ Install Xcode Command Line Tools:
 ~~~sh
 zsh build.sh
 "dist/Scan Connector for Mac.app/Contents/MacOS/Scan Connector for Mac" --self-test
+"dist/Scan Connector for Mac.app/Contents/MacOS/Scan Connector for Mac" --window-lifecycle-test
 ~~~
 
 MAC_NATIVE_SDK can override the SDK path. The app links only Apple system frameworks.
@@ -77,7 +80,7 @@ python3 -m venv .venv
 .venv/bin/python test_integration.py
 ~~~
 
-38 native checks cover migration, startup policy, image output, names, UDP acknowledgement/deduplication, and parsing. Four printer-free fixture tests verify fragmented two-page color, grayscale, and 1-bit text PDFs, plus failure cleanup.
+38 native checks cover migration, startup policy, image output, names, UDP acknowledgement/deduplication, and parsing. An offscreen window test verifies 50 close/reuse cycles without connecting to a printer or changing saved window placement. Four printer-free fixture tests verify fragmented two-page color, grayscale, and 1-bit text PDFs, plus failure cleanup.
 
 Optional real-device diagnostics:
 

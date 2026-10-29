@@ -24,6 +24,8 @@ jobs:
         run: zsh build.sh
       - name: Native checks
         run: '"dist/Scan Connector for Mac.app/Contents/MacOS/Scan Connector for Mac" --self-test'
+      - name: Window lifetime regression
+        run: '"dist/Scan Connector for Mac.app/Contents/MacOS/Scan Connector for Mac" --window-lifecycle-test'
       - name: Fixture integration tests
         run: python test_integration.py
       - name: Audit release inputs

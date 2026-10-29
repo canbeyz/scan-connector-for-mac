@@ -8,14 +8,23 @@ import ImageIO
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDelegate {
     let model = AppModel()
-    var window: NSWindow!
+    private(set) var window: NSWindow?
     var statusItem: NSStatusItem!
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        configureMenus()
-        window = NSWindow(contentRect:NSRect(x:0,y:0,width:940,height:800),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
+    func settingsWindow(rememberFrame: Bool = true) -> NSWindow {
+        if let window { return window }
+        let window = NSWindow(contentRect:NSRect(x:0,y:0,width:940,height:800),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
+        // The menu-bar receiver outlives a closed window. Keep ownership in Swift.
+        window.isReleasedWhenClosed = false
         window.title = "Scan Connector for Mac"; window.minSize = NSSize(width:880,height:650)
         window.contentView = NSHostingView(rootView:RootView(model:model)); window.delegate = self
-        window.center(); window.setFrameAutosaveName("MacNativeScanMainWindow")
+        window.center()
+        if rememberFrame { window.setFrameAutosaveName("MacNativeScanMainWindow") }
+        self.window = window
+        return window
+    }
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        configureMenus()
+        _ = settingsWindow()
         statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName:"scanner",accessibilityDescription:"Scan Connector for Mac")
         let menu = NSMenu(); menu.delegate = self; statusItem.menu = menu
@@ -44,7 +53,7 @@ import ImageIO
         }
         menu.addItem(.separator()); menu.addItem(withTitle:"Quit",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
     }
-    @objc func showWindow() { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps:true) }
+    @objc func showWindow() { settingsWindow().makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps:true) }
     @objc func openFolder() { model.showFolder() }
     @objc func scanNow() { model.performScan() }
     @objc func toggleReception() { if model.registered { model.pauseReceiving() } else { model.startReceiving() } }
@@ -81,7 +90,28 @@ func requiredHost() -> String {
 @main @MainActor struct AppEntry {
 static func main() {
 let arguments = CommandLine.arguments
-if arguments.contains("--enable-auto-reception") {
+if arguments.contains("--window-lifecycle-test") {
+    let app=NSApplication.shared;app.setActivationPolicy(.accessory)
+    let owner=AppDelegate()
+    weak var original=owner.settingsWindow(rememberFrame:false)
+    original?.setFrameOrigin(NSPoint(x:-100000,y:-100000))
+    guard let frame=original?.frame, NSScreen.screens.allSatisfy({ !$0.frame.intersects(frame) }) else {
+        fputs("Could not position the regression window offscreen.\n",stderr);exit(1)
+    }
+    for _ in 0..<50 {
+        autoreleasepool {
+            let window=owner.settingsWindow(rememberFrame:false)
+            window.orderFront(nil); window.close()
+        }
+        RunLoop.current.run(until:Date().addingTimeInterval(0.01))
+        guard let retained=original, owner.settingsWindow(rememberFrame:false) === retained,
+              retained.title == "Scan Connector for Mac", retained.contentView != nil else {
+            fputs("Window lifetime regression failed after close.\n",stderr);exit(1)
+        }
+    }
+    original=nil
+    print("PASS: 50 offscreen close/reuse cycles preserve the settings window");exit(0)
+} else if arguments.contains("--enable-auto-reception") {
     do {
         var settings=AppSettings.load();settings.automaticReception=true;settings.prepareForLaunch();try settings.save()
         if SMAppService.mainApp.status != .enabled { try SMAppService.mainApp.register() }
@@ -190,7 +220,7 @@ if arguments.contains("--self-test") {
 } else {
     let app = NSApplication.shared
     let delegate = AppDelegate(); app.delegate = delegate; app.setActivationPolicy(.regular)
-    app.run()
+    withExtendedLifetime(delegate) { app.run() }
 }
 }
 }
